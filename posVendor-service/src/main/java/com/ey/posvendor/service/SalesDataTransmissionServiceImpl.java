@@ -18,7 +18,6 @@ import java.util.List;
 @Service
 public class SalesDataTransmissionServiceImpl implements DataTransmissionService{
 
-
     Logger log = LoggerFactory.getLogger(SalesDataTransmissionServiceImpl.class);
 
     @Autowired
