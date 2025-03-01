@@ -6,5 +6,5 @@ import com.ey.posvendor.model.TransactionData;
 import java.util.List;
 
 public interface DataTransmissionService {
-    void transmitData(TransmitDataDto transmitDataDto);
+    String transmitData(List<TransmitDataDto> transmitDataDto);
 }

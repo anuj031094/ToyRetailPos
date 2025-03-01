@@ -7,10 +7,6 @@ import com.ey.posvendor.repository.TransactionRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.kafka.support.KafkaHeaders;
-import org.springframework.messaging.Message;
-import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
@@ -19,7 +15,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
+
+import static com.ey.posvendor.constants.PosConstants.*;
+
 
 @Service
 public class PosServiceImpl implements PosService{
@@ -41,9 +39,9 @@ public class PosServiceImpl implements PosService{
 
     @Transactional(propagation = Propagation.REQUIRES_NEW, isolation = Isolation.READ_COMMITTED)
     public void saveTransaction(TransactionData transactionData) {
-//        try {
+        try {
 
-            log.info("Saving data in Transaction!");
+            log.info("Saving data in Transaction Table!");
             List<TransmitDataDto> transmitDataDtoList = new ArrayList<>();
             for (TransactionDetails detail : transactionData.getTransactionDetailsList()) {
                 TransmitDataDto transmitDataDto = new TransmitDataDto();
@@ -57,36 +55,37 @@ public class PosServiceImpl implements PosService{
                 detail.setTransactionData(transactionData); // Set the parent reference
             }
 
-        transactionData.setCreatedAt(new Timestamp(System.currentTimeMillis()));
-        transactionRepository.save(transactionData);
+            //Real time data transmit to backend office
+            log.info("Number of records to process : {}", transmitDataDtoList.size());
+            for (TransmitDataDto transmit : transmitDataDtoList) {
+                transmit.setTransactionId(transactionData.getId());
+            }
+                String responseFromInventoryService = backOfficeDataTransmissionService.transmitData(transmitDataDtoList);
 
-        //Real time data transmit to backend office
-        log.info("Number of records to process : {}", transmitDataDtoList.size());
-        for (TransmitDataDto transmit : transmitDataDtoList) {
-            transmit.setTransactionId(transactionData.getId());
-            backOfficeDataTransmissionService.transmitData(transmit);
-            log.info("Successfully send Data for Transaction ID {} to BackOffice",transactionData.getId());
+                // Logic to check if we have inventory is updated for this transaction
+                if (STOCK_INVENTORY_UPDATED.equals(responseFromInventoryService)) {
+
+                    log.info("Data saved successfully in Transaction Table!");
+
+                    transactionData.setCreatedAt(new Timestamp(System.currentTimeMillis()));
+                    transactionRepository.save(transactionData);
+                    log.info("Successfully send Data for Transaction ID {} to BackOffice", transmitDataDtoList.get(0).getTransactionId());
+                }
+
+                // check if there is no product found for this product
+                else if (NO_INVENTORY_FOUND.equals(responseFromInventoryService)) {
+                    log.info("No product found with product id : {}", transmitDataDtoList.get(0).getProductId());
+//                    reverseTransactionUpdate(transmit.getProductId(), transmit.getQuantity());
+                }
+
+                // check if there is sufficient product to fulfill transaction
+                else if (INSUFFICIENT_STOCK.equals(responseFromInventoryService)) {
+                    log.info("Insufficient Stock for product id : {}", transmitDataDtoList.get(0).getProductId());
+//                    reverseTransactionUpdate(transmit.getProductId(), transmit.getQuantity());
+                }
+
+        } catch (Exception e) {
+            log.error("Error Occured while processing transaction in POS");
         }
-        log.info("Complete saving data in Transaction and sent to back office!");
-
-//        }
-//        catch (Exception e) {
-//            log.error("Error Occured while processing transaction in POS");
-//        }
-    }
-
-    //Compensation handler : Incase of any error reverse all transaction from transactionData
-    @KafkaListener(topics = "UndoFailedTransaction",
-            groupId = "transaction-group-id",
-            clientIdPrefix = "json",
-            containerFactory ="transactionListener")
-    public void reverseTransactionUpdate(TransmitDataDto transmitDataDto){
-        log.info("DELETING TRANSACTION FOR TRANSACTION ID: {}", transmitDataDto.getTransactionId());
-        TransactionData deleteTransactionData = transactionRepository.findById(transmitDataDto.getTransactionId())
-                .orElseThrow(() -> new RuntimeException("Transaction not found"));
-        transactionRepository.delete(deleteTransactionData);
-        log.info("DELETED TRANSACTION FOR TRANSACTION ID: {}", transmitDataDto.getTransactionId());
     }
 }
-
-//

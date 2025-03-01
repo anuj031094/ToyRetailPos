@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -28,14 +29,14 @@ public class SalesDataTransmissionServiceImpl implements DataTransmissionService
     @Autowired
     TransactionRepository transactionRepository;
 
-    @Value("${aws.sqs.queue.url}")
-    private String AWS_SQS_QUEUE_URL;
-
     @Autowired
     private TransmitDataDto transmitDataDto;
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @Value("${aws.sqs.queue.url}")
+    private String AWS_SQS_QUEUE_URL;
 
     @Scheduled(cron = "0 0/1 * * * *")
     public void processData() {
@@ -49,7 +50,9 @@ public class SalesDataTransmissionServiceImpl implements DataTransmissionService
                 transmitDataDto.setCustomerName(data.getCustomerName());
                 transmitDataDto.setPaymentMethod(data.getPaymentMethod());
                 transmitDataDto.setCreatedAt(data.getCreateAt());
-                transmitData(transmitDataDto);
+                List<TransmitDataDto> transmitDataList = new ArrayList<>();
+                transmitDataList.add(transmitDataDto);
+                transmitData(transmitDataList);
                 data.setSentToSales(true);
                 transactionRepository.save(data);
             }
@@ -57,8 +60,9 @@ public class SalesDataTransmissionServiceImpl implements DataTransmissionService
     }
 
     @Override
-    public void transmitData(TransmitDataDto transmitDataDto) {
+    public String transmitData(List<TransmitDataDto> transmitDataDtoList) {
         try {
+            transmitDataDto = transmitDataDtoList.get(0);
             log.info("Sending transaction {} to sales team!",transmitDataDto.getTransactionId());
             AmazonSQS sqsClient = sqsClientBuilder;
             SendMessageRequest request = new SendMessageRequest()
@@ -68,9 +72,10 @@ public class SalesDataTransmissionServiceImpl implements DataTransmissionService
 
             sqsClient.sendMessage(request);
             log.info("Successfully sent transaction {} to sales team!",transmitDataDto.getTransactionId());
-//                    .getMessageId();
+            return "Data sent successfully.";
         } catch (Exception e) {
             log.error("Error Occured while sending {} to sales team", transmitDataDto.getTransactionId());
+            return "Error occured while sending data.";
         }
     }
 }

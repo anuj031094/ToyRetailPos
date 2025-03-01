@@ -22,6 +22,9 @@ public class Inventory {
     @Column( name = "last_updated")
     private Timestamp last_updated;
 
+    @Version
+    private int version;
+
     public Integer getProductId() {
         return productId;
     }
@@ -60,5 +63,13 @@ public class Inventory {
 
     public void setLast_updated(Timestamp last_updated) {
         this.last_updated = last_updated;
+    }
+
+    public int getVersion() {
+        return version;
+    }
+
+    public void setVersion(int version) {
+        this.version = version;
     }
 }
