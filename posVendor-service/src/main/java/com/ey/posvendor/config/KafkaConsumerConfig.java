@@ -1,9 +1,9 @@
-package com.ey.backoffice.config;
+package com.ey.posvendor.config;
 
 import com.ey.posvendor.dto.TransmitDataDto;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.springframework.context.annotation.Bean;
 import org.apache.kafka.common.serialization.StringDeserializer;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
@@ -22,7 +22,7 @@ public class KafkaConsumerConfig {
     public ConsumerFactory<String, TransmitDataDto> transactionConsumerFactory() {
         Map<String, Object> props = new HashMap<>();
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
-        props.put(ConsumerConfig.GROUP_ID_CONFIG, "backoffice-group-id");
+        props.put(ConsumerConfig.GROUP_ID_CONFIG, "transaction-group-id");
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         final JsonDeserializer<TransmitDataDto> jsonDeserializer = new JsonDeserializer<>();
         jsonDeserializer.addTrustedPackages("*");

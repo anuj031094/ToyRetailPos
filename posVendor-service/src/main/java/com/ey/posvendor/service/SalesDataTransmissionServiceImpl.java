@@ -5,6 +5,7 @@ import com.amazonaws.services.sqs.model.SendMessageRequest;
 import com.ey.posvendor.dto.TransmitDataDto;
 import com.ey.posvendor.model.TransactionData;
 import com.ey.posvendor.repository.TransactionRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +34,9 @@ public class SalesDataTransmissionServiceImpl implements DataTransmissionService
     @Autowired
     private TransmitDataDto transmitDataDto;
 
+    @Autowired
+    private ObjectMapper objectMapper;
+
     @Scheduled(cron = "0 0/1 * * * *")
     public void processData() {
         List<TransactionData> unprocessedData = transactionRepository.findBySentToSalesFalse();
@@ -59,7 +63,7 @@ public class SalesDataTransmissionServiceImpl implements DataTransmissionService
             AmazonSQS sqsClient = sqsClientBuilder;
             SendMessageRequest request = new SendMessageRequest()
                     .withQueueUrl(AWS_SQS_QUEUE_URL)
-                    .withMessageBody(String.valueOf(transmitDataDto))
+                    .withMessageBody(objectMapper.writeValueAsString(transmitDataDto))
                     .withDelaySeconds(5);
 
             sqsClient.sendMessage(request);

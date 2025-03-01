@@ -1,4 +1,4 @@
-package com.ey.posvendor.config;
+package com.ey.backoffice.config;
 
 import com.ey.posvendor.dto.TransmitDataDto;
 import org.apache.kafka.clients.producer.ProducerConfig;

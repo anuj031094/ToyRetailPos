@@ -1,7 +1,6 @@
 package com.ey.posvendor.service;
 
 import com.ey.posvendor.dto.TransmitDataDto;
-import com.ey.posvendor.model.TransactionData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,9 +18,9 @@ public class BackOfficeDataTransmissionServiceImpl implements DataTransmissionSe
 
     Logger log = LoggerFactory.getLogger(BackOfficeDataTransmissionServiceImpl.class);
     @Autowired
-    public KafkaTemplate<String, TransactionData> kafkaTemplate;
+    public KafkaTemplate<String, TransmitDataDto> kafkaTemplate;
 
-    public BackOfficeDataTransmissionServiceImpl(KafkaTemplate<String, TransactionData> kafkaTemplate){
+    public BackOfficeDataTransmissionServiceImpl(KafkaTemplate<String, TransmitDataDto> kafkaTemplate){
         this.kafkaTemplate = kafkaTemplate;
     }
 
@@ -43,7 +42,7 @@ public class BackOfficeDataTransmissionServiceImpl implements DataTransmissionSe
         });
     }
 
-    private void onSuccess(SendResult<String, TransactionData> sendResult) {
+    private void onSuccess(SendResult<String, TransmitDataDto> sendResult) {
 //        System.out.println("Topic : " + sendResult.getRecordMetadata().topic());
 //
 //        System.out.println("Partition : " + sendResult.getRecordMetadata().partition());
