@@ -55,7 +55,7 @@ public class PosServiceImpl implements PosService{
         return transmitDataDtoList;
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW, isolation = Isolation.READ_COMMITTED)
+    @Transactional
     public String saveTransaction(TransactionData transactionData) {
 
         LOGGER.info("Saving data in Transaction Table!");
