@@ -19,6 +19,9 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.ey.posvendor.constants.PosConstants.DATA_SENT_SQS_ERROR;
+import static com.ey.posvendor.constants.PosConstants.DATA_SENT_SQS_SUCCESS;
+
 @Service
 public class SalesDataTransmissionServiceImpl implements DataTransmissionService{
 
@@ -83,10 +86,10 @@ public class SalesDataTransmissionServiceImpl implements DataTransmissionService
 
             sqsClient.sendMessage(request);
             log.info("Successfully sent transaction {} to sales team!",transmitDataDto.getTransactionId());
-            return "Data sent successfully.";
+            return DATA_SENT_SQS_SUCCESS;
         } catch (Exception e) {
             log.error("Error Occured while sending {} to sales team", transmitDataDto.getTransactionId());
-            return "Error occured while sending data.";
+            return DATA_SENT_SQS_ERROR;
         }
     }
 }

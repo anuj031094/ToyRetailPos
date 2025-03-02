@@ -21,13 +21,13 @@ public class PosTransactionController {
 
     @PostMapping("/transactions")
     public ResponseEntity<String> receiveTransactionData(@RequestBody TransactionData transactionData) {
-//        try {
+        try {
             // Pass the data to the service layer to be processed and stored.
             String response= posServiceImpl.saveTransaction(transactionData);
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
-//        } catch (Exception e) {
-//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error processing transaction data");
-//        }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error processing transaction!!");
+        }
     }
 }
 

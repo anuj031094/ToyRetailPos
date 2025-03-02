@@ -50,12 +50,6 @@ public class fetchTransactionData {
         LOGGER.info("TOTAL MESSAGE FETCHED : {}",messages.size());
         // Process the received messages
         for (Message message : messages) {
-            // Print out the body of each message
-//            System.out.println("Message ID: " + message.getMessageId());
-//            System.out.println("Message Body: " + message.getBody());
-
-
-
 
             TransmitDataDto transaction = objectMapper.readValue(message.getBody(), TransmitDataDto.class);
             SalesData salesData = new SalesData();

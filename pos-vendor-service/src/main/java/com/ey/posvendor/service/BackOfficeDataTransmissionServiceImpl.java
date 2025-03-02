@@ -9,6 +9,8 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 
+import static com.ey.posvendor.constants.PosConstants.INVENTORY_SERVICE_URL;
+
 @Service
 public class BackOfficeDataTransmissionServiceImpl implements DataTransmissionService{
 
@@ -17,29 +19,16 @@ public class BackOfficeDataTransmissionServiceImpl implements DataTransmissionSe
     @Autowired
     private RestTemplate restTemplate;
 
-    private static final String INVENTORY_SERVICE_URL = "http://localhost:8081";  // Change this to the actual Inventory Service URL
 
     @Override
     public String transmitData(List<TransmitDataDto> transmitDataDtoList) {
             String response = null;
 
             // Call the Inventory Service to update inventory
-            String url = INVENTORY_SERVICE_URL + "/inventory/update";
+            String url = INVENTORY_SERVICE_URL;
             response = restTemplate.postForObject(url, transmitDataDtoList, String.class);
 
             return response;
-
-    }
-
-    //Compensation method to call inventory to rollback
-    public String rollBackInventory(List<TransmitDataDto> transmitDataDtoList) {
-        String response = null;
-
-        // Call the Inventory Service to update inventory
-        String url = INVENTORY_SERVICE_URL + "/inventory/rollback";
-        response = restTemplate.postForObject(url, transmitDataDtoList, String.class);
-
-        return response;
 
     }
 }

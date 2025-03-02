@@ -29,15 +29,4 @@ public class InventoryController {
             return ResponseEntity.status(500).body("Error: " + e.getMessage());
         }
     }
-
-    @PostMapping("/rollback")
-    public ResponseEntity<String> rollbackInventory(@RequestBody List<TransmitDataDto> request) {
-        try {
-            String response = inventoryService.rollbackInventory(request);
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body("Error: " + e.getMessage());
-        }
-    }
-
 }

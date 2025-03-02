@@ -17,8 +17,6 @@ public class TransactionDetails implements Serializable {
     private Integer productId;
     @Column(name = "quantity")
     private int quantity;
-    @Column(name = "created_at")
-    private Timestamp createdAt;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name ="transaction_id", nullable = false)
     private TransactionData transactionData;
@@ -46,15 +44,6 @@ public class TransactionDetails implements Serializable {
     public void setQuantity(int quantity) {
         this.quantity = quantity;
     }
-
-    public Timestamp getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(Timestamp createdAt) {
-        this.createdAt = createdAt;
-    }
-
 
     public TransactionData getTransactionData() {
         return transactionData;

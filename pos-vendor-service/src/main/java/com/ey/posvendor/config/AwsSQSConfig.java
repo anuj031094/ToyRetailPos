@@ -28,13 +28,6 @@ public class AwsSQSConfig {
     @Value("${aws.sqs.queue.url}")
     private String AWS_SQS_QUEUE_URL;
 
-    @Value("${aws.sqs.dl.queue}")
-    private String AWS_SQS_DL_QUEUE;
-    @Value("${aws.sqs.dl.arn}")
-    private String AWS_SQS_QUEUE_DL_ARN;
-    @Value("${aws.sqs.dl.queue.url}")
-    private String AWS_SQS_QUEUE_DL_URL;
-
     private AWSCredentials awsCredentials() {
         return new BasicAWSCredentials(AWS_ACCESS_KEY, AWS_SECRET_KEY);
     }

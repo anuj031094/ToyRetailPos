@@ -11,45 +11,45 @@ public class InventoryTransactionLog {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    private Integer id;
+    private int id;
     @Column(name = "transaction_id")
-    private Integer transactionId;
+    private int transactionId;
     @Column(name = "product_id")
-    private Integer productId;
+    private int productId;
     @Column(name = "quantity_purchased")
-    private Integer quantityPurchased;
+    private int quantityPurchased;
     @Column(name = "last_updated")
     private Timestamp lastUpdated;
 
-    public Integer getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(int id) {
         this.id = id;
     }
 
-    public Integer getTransactionId() {
+    public int getTransactionId() {
         return transactionId;
     }
 
-    public void setTransactionId(Integer transactionId) {
+    public void setTransactionId(int transactionId) {
         this.transactionId = transactionId;
     }
 
-    public Integer getProductId() {
+    public int getProductId() {
         return productId;
     }
 
-    public void setProductId(Integer productId) {
+    public void setProductId(int productId) {
         this.productId = productId;
     }
 
-    public Integer getQuantityPurchased() {
+    public int getQuantityPurchased() {
         return quantityPurchased;
     }
 
-    public void setQuantityPurchased(Integer quantityPurchased) {
+    public void setQuantityPurchased(int quantityPurchased) {
         this.quantityPurchased = quantityPurchased;
     }
 

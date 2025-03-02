@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static com.ey.posvendor.constants.PosConstants.*;
 
@@ -22,7 +23,7 @@ import static com.ey.posvendor.constants.PosConstants.*;
 @Service
 public class PosServiceImpl implements PosService{
 
-    Logger log = LoggerFactory.getLogger(PosServiceImpl.class);
+    Logger LOGGER = LoggerFactory.getLogger(PosServiceImpl.class);
 
     @Autowired
     private TransactionRepository transactionRepository;
@@ -57,50 +58,55 @@ public class PosServiceImpl implements PosService{
     @Transactional(propagation = Propagation.REQUIRES_NEW, isolation = Isolation.READ_COMMITTED)
     public String saveTransaction(TransactionData transactionData) {
 
+        LOGGER.info("Saving data in Transaction Table!");
+
         List<TransmitDataDto> transmitDataDtoList = populateTransmitDataDto(transactionData);
         String responseFromInventoryService = null;
         try {
-            log.info("Saving data in Transaction Table!");
 
             //Real time data transmit to backend office
-            log.info("Checking inventory in back office for  {} product", transmitDataDtoList.size());
+            LOGGER.info("Checking inventory in back office for  {} product", transmitDataDtoList.size());
+
+                transactionData.setCreatedAt(new Timestamp(System.currentTimeMillis()));
+                transactionRepository.save(transactionData);
+
+            for (TransmitDataDto transmitDataDto : transmitDataDtoList) {
+                transmitDataDto.setTransactionId(transactionData.getId());
+            }
 
                 responseFromInventoryService = backOfficeDataTransmissionService.transmitData(transmitDataDtoList);
 
                 // Logic to check if we have inventory is updated for this transaction
                 if (STOCK_INVENTORY_UPDATED.equals(responseFromInventoryService)) {
-
-                    log.info("Data saved successfully in Transaction Table!");
-
-                    transactionData.setCreatedAt(new Timestamp(System.currentTimeMillis()));
-                    transactionRepository.save(transactionData);
-                    log.info("Successfully send Data for Transaction ID {} to BackOffice", transactionData.getId());
-                    return "Transaction Successfull!!";
+                    LOGGER.info("Data saved successfully for Transaction ID {}", transactionData.getId());
+                    return TRANSACTION_SUCCESS_MESSAGE;
                 }
 
                 // check if there is no product found for this product
                 else if (NO_INVENTORY_FOUND.equals(responseFromInventoryService)) {
-                    log.info("No product found with product id : {}", transmitDataDtoList.get(0).getProductId());
-                    return "No product found in inventory!!";
+                    LOGGER.info("No product found with product id : {}", transmitDataDtoList.get(0).getProductId());
+                    reverseTransactionUpdate(transactionData);
+                    return NO_PRODUCT_ERROR_MESSAGE;
                 }
 
                 // check if there is sufficient product to fulfill transaction
                 else if (INSUFFICIENT_STOCK.equals(responseFromInventoryService)) {
-                    log.info("Insufficient Stock for product id : {}", transmitDataDtoList.get(0).getProductId());
-                    return "Insufficient Stock for this transaction!!";
+                    LOGGER.info("Insufficient Stock for product id : {}", transmitDataDtoList.get(0).getProductId());
+                    reverseTransactionUpdate(transactionData);
+                    return INSUFFICIENT_STOCK_ERROR_MESSAGE;
                 }
             return "Transaction Unsuccessfull!!";
         } catch (Exception e) {
-            log.error("Error Occured while processing transaction in POS");
-            reverseTransactionUpdate(transmitDataDtoList,responseFromInventoryService);
-            return "Error Occured while processing transaction in POS";
+            LOGGER.error("Error Occured while processing transaction in POS");
+            reverseTransactionUpdate(transactionData);
+            return ERROR_TRANSACTION_POS_ERROR_MESSAGE;
         }
     }
 
-    public void reverseTransactionUpdate(List<TransmitDataDto> transmitDataDtoList, String updatedResponseInventory) {
-        if (STOCK_INVENTORY_UPDATED.equals(updatedResponseInventory)) {
-            String response = backOfficeDataTransmissionService.rollBackInventory(transmitDataDtoList);
-            log.info(response);
-        }
+    public void reverseTransactionUpdate( TransactionData transactionData) {
+        LOGGER.info("ROLLBACKING TRANSACTION RECORD FOR TRANSACTION ID: {}", transactionData.getId());
+        Optional<TransactionData> deleteTransactionData = transactionRepository.findById(transactionData.getId());
+        deleteTransactionData.ifPresent(data -> transactionRepository.delete(data));
+        LOGGER.info("ROLLBACKED TRANSACTION RECORD FOR TRANSACTION ID: {}", transactionData.getId());
     }
 }
