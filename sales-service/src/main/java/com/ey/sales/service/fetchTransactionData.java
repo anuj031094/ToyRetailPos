@@ -65,7 +65,6 @@ public class fetchTransactionData {
             salesData.setTransactionDate(transaction.getCreatedAt());
             salesData.setPaymentMethod(transaction.getPaymentMethod());
             salesData.setTotalAmount(transaction.getTotalAmount());
-            salesData.setProductId(transaction.getProductId());
             salesData.setCreatedOn(new Timestamp(System.currentTimeMillis()));
             salesRepository.save(salesData);
             LOGGER.info("Transaction ID : {}",transaction.getTransactionId());

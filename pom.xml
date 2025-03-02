@@ -22,8 +22,8 @@
 		<developer/>
 	</developers>
 	<modules>
-		<module>posVendor-service</module>
-		<module>backOffice-service</module>
+		<module>pos-vendor-service</module>
+		<module>back-office-service</module>
 		<module>sales-service</module>
 	</modules>
 	<scm>

@@ -18,8 +18,6 @@ public class SalesData {
     private int transactionId;
     @Column(name = "customer_name")
     private String customerName;
-    @Column(name = "product_id")
-    private int productId;
     @Column(name = "number_of_items")
     private int numberOfItems;
     @Column(name = "total_amount")
@@ -53,14 +51,6 @@ public class SalesData {
 
     public void setCustomerName(String customerName) {
         this.customerName = customerName;
-    }
-
-    public int getProductId() {
-        return productId;
-    }
-
-    public void setProductId(int productId) {
-        this.productId = productId;
     }
 
     public int getNumberOfItems() {
