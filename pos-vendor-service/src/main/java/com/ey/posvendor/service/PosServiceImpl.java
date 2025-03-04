@@ -31,8 +31,6 @@ public class PosServiceImpl implements PosService{
     @Autowired
     private BackOfficeDataTransmissionServiceImpl backOfficeDataTransmissionService;
 
-    List<TransmitDataDto> transmitDataDtoList = new ArrayList<>();
-
     public PosServiceImpl(TransactionRepository transactionRepository, BackOfficeDataTransmissionServiceImpl backOfficeDataTransmissionService) {
         this.transactionRepository = transactionRepository;
         this.backOfficeDataTransmissionService = backOfficeDataTransmissionService;
@@ -68,6 +66,7 @@ public class PosServiceImpl implements PosService{
             LOGGER.info("Checking inventory in back office for  {} product", transmitDataDtoList.size());
 
                 transactionData.setCreatedAt(new Timestamp(System.currentTimeMillis()));
+                transactionData.setSentToSales(false);
                 transactionRepository.save(transactionData);
 
             for (TransmitDataDto transmitDataDto : transmitDataDtoList) {
